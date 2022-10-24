@@ -3,11 +3,12 @@ Software for the Tablut Students Competition
 
 ## Installation on Ubuntu/Debian 
 
-From console, run these commands to install JDK 8 e ANT:
+From console, run these commands to install JDK 11 and ANT (the -y options enables is used to skip
+the installation confirmation):
 
 ```
 sudo apt update
-sudo apt install openjdk-8-jdk -y
+sudo apt install default-jre -y
 sudo apt install ant -y
 ```
 
@@ -54,11 +55,30 @@ To be able to run other classes, change the `build.xml` file and re-compile ever
 
 ## Replay function
 
-Replay a game using the logfile
+Used to replay a game using the logfile.
 
-Example:
+Firstly, generate the server.jar file by running
 
 ```
-java -jar .\server.jar -g -R .\logs\PLAYER1_vs_PLAYER2_1652711382324_gameLog.txt
+ant server-jar
 ```
 
+Finally, you can run it as follows:
+
+```
+java -jar .\server.jar -g -R .\logs\[log_file_name].txt
+```
+
+Here, the -g option enables the GUI, and the -R option is for replaying a game with the log located in the specified path.
+
+To check all the available options for ant server, a help text is displayed when you run
+
+```
+ant server
+```
+
+Also, if you want to find all the options available to run with ant, you can check the following file:
+
+```
+Tablut/build.xml
+```
