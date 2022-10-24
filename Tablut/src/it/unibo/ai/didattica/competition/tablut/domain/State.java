@@ -59,6 +59,20 @@ public abstract class State {
 			return pawn;
 		}
 
+		public static Pawn fromString(String s) {
+			String lowerS = s.toLowerCase();
+			if (lowerS.contains("w")) {
+				return Pawn.WHITE;
+			} else if (lowerS.contains("b")) {
+				return Pawn.BLACK;
+			} else if (lowerS.contains("t")) {
+				return Pawn.THRONE;
+			} else if (lowerS.contains("k")) {
+				return Pawn.KING;
+			} else {
+				return Pawn.EMPTY;
+			}
+		}
 	}
 
 	protected Pawn board[][];
