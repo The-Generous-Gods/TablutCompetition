@@ -1,12 +1,11 @@
 """
-State representation:
-    - matrix for board state
-        - 9x9 matrix
+Board representation:
+    - 9x9 matrix
+    - cell content:
         - 0 - no pawn
         - 1 - black pawn
         - 2 - white pawn
         - 3 - king pawn
-    - role
 """
 
 # TODO: Check Problems tab
