@@ -46,9 +46,9 @@ def send_str(sock, string):
 
 def send_name(sock, role):
     if 'w' in role:
-        player_name = 'WHITE_GOD'
+        player_name = "WHITE_GOD"
     else:
-        player_name = 'BLACK_GOD'
+        player_name = "BLACK_GOD"
 
     send_str(sock, player_name)
 
@@ -76,10 +76,8 @@ def receive_state(sock):
 
 
 def read_state(client_socket):
-    return receive_state(client_socket)
-    # TODO: ADAPT THIS
-    # board, to_move = receive_state()
-    # return gutils.from_server_state_to_pawns(board, to_move)
+    board, to_move = receive_state(client_socket)
+    return board, to_move
 
 
 def from_move_to_server_action(move):
@@ -103,18 +101,33 @@ def send_action(sock, move, role):
         "turn": turn
     }
 
+    print(action_dict)
+
     json_str = json.dumps(action_dict)
     return send_str(sock, json_str)
 
 
+def update_state(new_state):
+    # TODO: TO DO
+    print(new_state)
+    return None
+
+
 def main():
     role, timeout, ip_address, port = get_params()
-    black = 'w' in role
+    black = 'b' in role
     client_socket = connect(ip_address, port)
     send_name(client_socket, role)
-    print(read_state(client_socket))
+    current_state = read_state(client_socket)
+    update_state(current_state)
     if black:
-        print(read_state(client_socket))
+        current_state = read_state(client_socket)
+        update_state(current_state)
     while True:
         send_action(client_socket, ((1, 1), (1, 2)), role)
-        print(read_state(client_socket))
+        current_state = read_state(client_socket)
+        update_state(current_state)
+
+
+if __name__ == '__main__':
+    main()
