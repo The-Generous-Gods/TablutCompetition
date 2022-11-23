@@ -99,10 +99,16 @@ def the_main():
     while True:
         # Compute move
         # TODO: Change N back to higher value (currently 10 for testing purposes)
-        my_move, tree = compute_move(current_state, the_game, 10, tree)
+        my_move = compute_move(current_state, the_game, 10, tree)
+
+        # Update stored state
+        current_state = the_game.result(current_state, my_move)
 
         # Send our move
         send_action(client_socket, my_move, role)
+
+        # Receive result of our move
+        _ = read_state(client_socket)
 
         # Wait for new move
         received_state, received_mover = read_state(client_socket)

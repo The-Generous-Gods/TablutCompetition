@@ -66,8 +66,8 @@ def read_state(client_socket):
 
 def from_move_to_server_action(move):
     from_move, to_move = move
-    from_action = f'{chr(ord("`") + (from_move[0] + 1))}{from_move[1] + 1}'
-    to_action = f'{chr(ord("`") + (to_move[0] + 1))}{to_move[1] + 1}'
+    from_action = f'{chr(ord("`") + (from_move[1] + 1))}{from_move[0] + 1}'
+    to_action = f'{chr(ord("`") + (to_move[1] + 1))}{to_move[0] + 1}'
 
     return from_action, to_action
 
@@ -84,8 +84,6 @@ def send_action(sock, move, role):
         "to": to_action,
         "turn": turn
     }
-
-    print(action_dict)
 
     json_str = json.dumps(action_dict)
     return send_str(sock, json_str)
