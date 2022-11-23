@@ -1,5 +1,5 @@
 from tablut_game import TablutGame
-from given_resources.games4e import our_monte_carlo
+from given_resources.games4e import our_monte_carlo, monte_carlo_tree_search
 import numpy as np
 import sys
 from connect import *
@@ -8,7 +8,7 @@ from connect import *
 def get_move_from_state_diff(old_board, new_board):
     changes = np.argwhere(old_board != new_board)
 
-    if old_board[changes[0]] != 0:
+    if old_board[tuple(changes[0])] != 0:
         return tuple(changes[0]), tuple(changes[1])
     else:
         return tuple(changes[1]), tuple(changes[0])
@@ -16,7 +16,8 @@ def get_move_from_state_diff(old_board, new_board):
 
 def compute_move(state, game, max_steps, tree):
     # TODO: maybe modify instead of max_steps give max_time or keep max_steps if constant ish
-    return our_monte_carlo(state, game, max_steps, tree)
+    return monte_carlo_tree_search(state, game, max_steps)
+    # return our_monte_carlo(state, game, max_steps, tree)
 
 
 def get_params():
@@ -85,13 +86,13 @@ def the_main():
 
     # Receive initial state from server
     # TODO: Maybe check that identical to our (initial) current_state; update otherwise
-    received_state = read_state(client_socket)
+    received_state, received_mover = read_state(client_socket)
     # update_state(current_state)
 
     # White starts so black needs to wait for turn
     if black:
         # Get new state
-        received_state = read_state(client_socket)
+        received_state, received_mover = read_state(client_socket)
         # Update stored state
         current_state = update_state(received_state, current_state, the_game)
 
@@ -104,13 +105,13 @@ def the_main():
         send_action(client_socket, my_move, role)
 
         # Wait for new move
-        received_state = read_state(client_socket)
+        received_state, received_mover = read_state(client_socket)
 
         # Update with their move
         current_state = update_state(received_state, current_state, the_game)
 
         # Update tree according to decision
-        tree = tree.children.get(current_state)
+        # tree = tree.children.get(current_state)
 
 
 if __name__ == '__main__':
