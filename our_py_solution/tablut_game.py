@@ -131,7 +131,7 @@ class TablutGame(Game):
         king_positions = np.argwhere(state.board == 3)
         return \
             len(king_positions) == 0 or \
-            king_positions[0] in self.escapes or \
+            tuple(king_positions[0]) in self.escapes or \
             len(state.moves) == 0
 
     def compute_legal_moves(self, i, j, board):
@@ -231,7 +231,7 @@ class TablutGame(Game):
                         board[i, j] = 0
 
             # King capture scenarios
-            king_position = np.argwhere(board == 3)[0]
+            king_position = tuple(np.argwhere(board == 3)[0])
             # King in castle
             if king_position in self.castles:
                 if board[3, 4] == board[4, 3] == board[4, 5] == board[5, 4] == 1:

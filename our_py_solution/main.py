@@ -16,9 +16,7 @@ def get_move_from_state_diff(old_board, new_board):
 
 def compute_move(state, game, max_steps, tree):
     # TODO: maybe modify instead of max_steps give max_time or keep max_steps if constant ish
-    tree = our_monte_carlo(state, game, max_steps, tree)
-    move = get_move_from_state_diff(state.board, tree.state.board)
-    return move, tree
+    return our_monte_carlo(state, game, max_steps, tree)
 
 
 def get_params():
@@ -36,7 +34,7 @@ def get_params():
     return role, timeout, ip_address, port
 
 
-def update_state(new_state):
+def update_state(new_board, old_state, game):
     """
     Utility function to transform from received state to our representation
 
@@ -44,18 +42,21 @@ def update_state(new_state):
     :return:
     """
     # Transform to np array in order to work element-wise
-    state = np.array(new_state)
+    new_board = np.array(new_board)
 
     # Transform to our representation
-    state[state == "EMPTY"] = 0
-    state[state == "BLACK"] = 1
-    state[state == "WHITE"] = 2
-    state[state == "KING"] = 3
+    new_board[new_board == "EMPTY"] = 0
+    new_board[new_board == "BLACK"] = 1
+    new_board[new_board == "WHITE"] = 2
+    new_board[new_board == "KING"] = 3
 
     # Transform from str to int
-    state = state.astype("uint8")
+    new_board = new_board.astype("uint8")
 
-    return state
+    # Compute move
+    the_move = get_move_from_state_diff(old_state.board, new_board)
+
+    return game.result(old_state, the_move)
 
 
 def the_main():
@@ -92,7 +93,7 @@ def the_main():
         # Get new state
         received_state = read_state(client_socket)
         # Update stored state
-        current_state = update_state(received_state)
+        current_state = update_state(received_state, current_state, the_game)
 
     while True:
         # Compute move
@@ -106,7 +107,7 @@ def the_main():
         received_state = read_state(client_socket)
 
         # Update with their move
-        current_state = update_state(received_state)
+        current_state = update_state(received_state, current_state, the_game)
 
         # Update tree according to decision
         tree = tree.children.get(current_state)

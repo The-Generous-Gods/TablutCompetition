@@ -267,7 +267,7 @@ def our_monte_carlo(state, game, N=1000, root=None):
 
     max_state = max(root.children, key=lambda p: p.N)
 
-    return root.children.get(max_state)
+    return root.children.get(max_state), root
 
 
 # ______________________________________________________________________________
