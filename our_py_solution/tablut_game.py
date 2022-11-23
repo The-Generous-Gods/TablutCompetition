@@ -1,4 +1,6 @@
 """
+Columns and rows counting from 0
+
 Board representation:
     - 9x9 matrix
     - cell content:
@@ -6,10 +8,13 @@ Board representation:
         - 1 - black pawn
         - 2 - white pawn
         - 3 - king pawn
+
+Move representation (tuple of 2 tuples):
+    - ((origin_i, origin_j), (destination_i, destination_j)
 """
 
-# TODO: Check Problems tab
 import numpy as np
+import random
 
 from given_resources.games4e import Game, GameState
 
@@ -78,7 +83,7 @@ class TablutGame(Game):
 
         self.initial = GameState(
             to_move='w',
-            # TODO: INSERT HEURISTIC
+            # TODO: INSERT HEURISTIC (HERE PROBABLY 0 CAUSE INITIAL STATE SO EQUAL ODDS)
             utility=0,
             board=board,
             moves=moves
@@ -110,11 +115,14 @@ class TablutGame(Game):
 
         return GameState(
             to_move=('w' if state.to_move == 'b' else 'b'),
-            # TODO: INSERT HEURISTIC
-            utility=0,
+            utility=self.compute_utility(),
             board=new_board,
             moves=new_moves
         )
+
+    def compute_utility(self):
+        # TODO: INSERT HEURISTIC
+        return random.randint(-100, 100)
 
     def utility(self, state, player):
         return state.utility if self.player == player else -state.utility

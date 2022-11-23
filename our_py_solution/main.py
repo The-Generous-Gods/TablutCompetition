@@ -2,6 +2,7 @@ from tablut_game import TablutGame
 from given_resources.games4e import our_monte_carlo
 import numpy as np
 import sys
+from connect import *
 
 
 def get_move_from_state_diff(old_board, new_board):
@@ -20,44 +21,96 @@ def compute_move(state, game, max_steps, tree):
     return move, tree
 
 
-def send(move):
-    # TODO: OBVIOUSLY
-    return "SENDING"
+def get_params():
+    role = sys.argv[1]
+    timeout = sys.argv[2]
+    ip_address = sys.argv[3]
+
+    if 'w' in role.lower():
+        role = 'w'
+        port = 5800
+    else:
+        role = 'b'
+        port = 5801
+
+    return role, timeout, ip_address, port
 
 
-def wait():
-    # TODO: OBVIOUSLY
-    return "WAITING"
+def update_state(new_state):
+    """
+    Utility function to transform from received state to our representation
+
+    :param new_state:
+    :return:
+    """
+    # Transform to np array in order to work element-wise
+    state = np.array(new_state)
+
+    # Transform to our representation
+    state[state == "EMPTY"] = 0
+    state[state == "BLACK"] = 1
+    state[state == "WHITE"] = 2
+    state[state == "KING"] = 3
+
+    # Transform from str to int
+    state = state.astype("uint8")
+
+    return state
 
 
-def the_main(role, time_out, address):
-    # TODO: Connect with json
+def the_main():
+    """
+    Current assumption that we only receive legal moves.
+
+    :return:
+    """
+
+    # Get params
+    role, timeout, ip_address, port = get_params()
+
+    # Help flag
+    black = 'b' in role
+
+    # Connect to socket
+    client_socket = connect(ip_address, port)
+
     # Initialize game
     the_game = TablutGame(role)
     current_state = the_game.initial
     tree = None
 
-    while True:
-        if current_state.to_move == role:
-            my_move, tree = compute_move(current_state, the_game, 1000, tree)
-            current_state = the_game.result(current_state, my_move)
-            send(my_move)
-        else:
-            their_move = wait()
-            current_state = the_game.result(current_state, their_move)
-            tree = tree.children.get(current_state)
+    # Mandatory first step: sending self name
+    send_name(client_socket, role)
 
-    # TODO: Check OneNote and rules once again to check that it's all
+    # Receive initial state from server
+    # TODO: Maybe check that identical to our (initial) current_state; update otherwise
+    received_state = read_state(client_socket)
+    # update_state(current_state)
+
+    # White starts so black needs to wait for turn
+    if black:
+        # Get new state
+        received_state = read_state(client_socket)
+        # Update stored state
+        current_state = update_state(received_state)
+
+    while True:
+        # Compute move
+        # TODO: Change N back to higher value (currently 10 for testing purposes)
+        my_move, tree = compute_move(current_state, the_game, 10, tree)
+
+        # Send our move
+        send_action(client_socket, my_move, role)
+
+        # Wait for new move
+        received_state = read_state(client_socket)
+
+        # Update with their move
+        current_state = update_state(received_state)
+
+        # Update tree according to decision
+        tree = tree.children.get(current_state)
 
 
 if __name__ == '__main__':
-    role = sys.argv[1]
-    time_out = sys.argv[2]
-    address = sys.argv[3]
-
-    if "w" in role.lower():
-        role = "w"
-    else:
-        role = "b"
-
-    # the_main(role, time_out, address)
+    the_main()
