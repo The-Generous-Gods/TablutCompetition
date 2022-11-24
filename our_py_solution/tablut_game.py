@@ -142,6 +142,8 @@ class TablutGame(Game):
 
         # UP moves
         for i_up in reversed(range(0, i)):
+            if ((i, j) not in self.camps) and ((i_up, j) in self.camps):
+                break
             if board[i_up, j] == 0:
                 moves.append(((i, j), (i_up, j)))
             else:
@@ -149,6 +151,8 @@ class TablutGame(Game):
 
         # DOWN moves
         for i_down in range(i + 1, board.shape[0]):
+            if ((i, j) not in self.camps) and ((i_down, j) in self.camps):
+                break
             if board[i_down, j] == 0:
                 moves.append(((i, j), (i_down, j)))
             else:
@@ -156,6 +160,8 @@ class TablutGame(Game):
 
         # LEFT moves
         for j_left in reversed(range(0, j)):
+            if ((i, j) not in self.camps) and ((i, j_left) in self.camps):
+                break
             if board[i, j_left] == 0:
                 moves.append(((i, j), (i, j_left)))
             else:
@@ -163,6 +169,8 @@ class TablutGame(Game):
 
         # RIGHT moves
         for j_right in range(j + 1, board.shape[1]):
+            if ((i, j) not in self.camps) and ((i, j_right) in self.camps):
+                break
             if board[i, j_right] == 0:
                 moves.append(((i, j), (i, j_right)))
             else:
