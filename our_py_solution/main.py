@@ -5,7 +5,14 @@ import sys
 from connect import *
 
 
-def get_move_from_state_diff(old_board, new_board):
+def get_move_from_state_diff(old_board, new_board, role):
+    if 'w' in role:
+        old_board = old_board * (old_board > 1).astype("uint8")
+        new_board = new_board * (new_board > 1).astype("uint8")
+    else:
+        old_board = old_board * (old_board == 1).astype("uint8")
+        new_board = new_board * (new_board == 1).astype("uint8")
+
     changes = np.argwhere(old_board != new_board)
 
     if old_board[tuple(changes[0])] != 0:
@@ -35,7 +42,7 @@ def get_params():
     return role, timeout, ip_address, port
 
 
-def update_state(new_board, old_state, game):
+def update_state(new_board, old_state, game, role):
     """
     Utility function to transform from received state to our representation
 
@@ -55,7 +62,7 @@ def update_state(new_board, old_state, game):
     new_board = new_board.astype("uint8")
 
     # Compute move
-    the_move = get_move_from_state_diff(old_state.board, new_board)
+    the_move = get_move_from_state_diff(old_state.board, new_board, 'w' if 'b' in role else 'b')
 
     return game.result(old_state, the_move)
 
@@ -94,7 +101,7 @@ def the_main():
         # Get new state
         received_state, received_mover = read_state(client_socket)
         # Update stored state
-        current_state = update_state(received_state, current_state, the_game)
+        current_state = update_state(received_state, current_state, the_game, role)
 
     while True:
         # Compute move
@@ -114,7 +121,7 @@ def the_main():
         received_state, received_mover = read_state(client_socket)
 
         # Update with their move
-        current_state = update_state(received_state, current_state, the_game)
+        current_state = update_state(received_state, current_state, the_game, role)
 
         # Update tree according to decision
         # tree = tree.children.get(current_state)
