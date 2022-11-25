@@ -1,5 +1,5 @@
 from tablut_game import TablutGame
-from given_resources.games4e import our_monte_carlo, monte_carlo_tree_search
+from given_resources.games4e import our_monte_carlo, monte_carlo_tree_search, GameState
 import numpy as np
 import sys
 from connect import *
@@ -60,12 +60,26 @@ def update_state(new_board, old_state, game, role):
     new_board[new_board == "THRONE"] = 0
 
     # Transform from str to int
-    new_board = new_board.astype("uint8")
+    # new_board = new_board.astype("uint8")
 
     # Compute move
-    the_move = get_move_from_state_diff(old_state.board, new_board, 'w' if 'b' in role else 'b')
+    # the_move = get_move_from_state_diff(old_state.board, new_board, 'w' if 'b' in role else 'b')
 
-    return game.result(old_state, the_move)
+    moves = list()
+    if role == 'b':
+        for (i, j) in np.argwhere(new_board == 1):
+            moves += game.compute_legal_moves(i, j, new_board)
+    else:
+        for (i, j) in np.argwhere(new_board > 1):
+            moves += game.compute_legal_moves(i, j, new_board)
+
+    # return game.result(old_state, the_move)
+    return GameState(
+            to_move=role,
+            utility=game.compute_utility(),
+            board=new_board,
+            moves=moves
+    )
 
 
 def the_main():
