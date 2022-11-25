@@ -57,6 +57,7 @@ def update_state(new_board, old_state, game, role):
     new_board[new_board == "BLACK"] = 1
     new_board[new_board == "WHITE"] = 2
     new_board[new_board == "KING"] = 3
+    new_board[new_board == "THRONE"] = 0
 
     # Transform from str to int
     new_board = new_board.astype("uint8")
