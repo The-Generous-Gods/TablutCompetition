@@ -70,7 +70,9 @@ def update_state(new_board, old_state, game, role):
         for (i, j) in np.argwhere(new_board == 1):
             moves += game.compute_legal_moves(i, j, new_board)
     else:
-        for (i, j) in np.argwhere(new_board > 1):
+        for (i, j) in np.argwhere(new_board == 2):
+            moves += game.compute_legal_moves(i, j, new_board)
+        for (i, j) in np.argwhere(new_board == 3):
             moves += game.compute_legal_moves(i, j, new_board)
 
     # return game.result(old_state, the_move)
