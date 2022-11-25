@@ -238,6 +238,15 @@ class TablutGame(Game):
                     if board[i + rel_pos_i, j + rel_pos_j] == 1:
                         board[i, j] = 0
 
+                # Check camp adjacency
+                if (i, j) in self.camps_adjacency:
+                    for neighbor_offset in self.neighbors:
+                        neighbor_position = tuple(np.array((i, j)) + np.array(neighbor_offset))
+                        if neighbor_position not in self.camps:
+                            if board[neighbor_position] == 1:
+                                board[i, j] = 0
+                                break
+
             # King capture scenarios
             king_position = tuple(np.argwhere(board == 3)[0])
             # King in castle
