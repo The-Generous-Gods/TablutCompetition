@@ -60,7 +60,7 @@ def update_state(new_board, old_state, game, role):
     new_board[new_board == "THRONE"] = 0
 
     # Transform from str to int
-    # new_board = new_board.astype("uint8")
+    new_board = new_board.astype("uint8")
 
     # Compute move
     # the_move = get_move_from_state_diff(old_state.board, new_board, 'w' if 'b' in role else 'b')
@@ -70,9 +70,7 @@ def update_state(new_board, old_state, game, role):
         for (i, j) in np.argwhere(new_board == 1):
             moves += game.compute_legal_moves(i, j, new_board)
     else:
-        for (i, j) in np.argwhere(new_board == 2):
-            moves += game.compute_legal_moves(i, j, new_board)
-        for (i, j) in np.argwhere(new_board == 3):
+        for (i, j) in np.argwhere(new_board > 1):
             moves += game.compute_legal_moves(i, j, new_board)
 
     # return game.result(old_state, the_move)
