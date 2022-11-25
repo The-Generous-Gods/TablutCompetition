@@ -208,7 +208,7 @@ class TablutGame(Game):
                         board[new_i + i_diff, new_j + j_diff] == 1:
                     board[new_i + i_diff, new_j + j_diff] = 0
                 # Camp adjacency
-                if (new_i + i_diff, new_j + j_diff) in self.camps and \
+                if (new_i + i_diff, new_j + j_diff) in self.camps_adjacency and \
                         (new_i, new_j) not in self.camps and \
                         board[new_i + i_diff, new_j + j_diff] == 1:
                     board[new_i + i_diff, new_j + j_diff] = 0
@@ -228,7 +228,7 @@ class TablutGame(Game):
                         board[new_i + i_diff, new_j + j_diff] > 1:
                     board[new_i + i_diff, new_j + j_diff] = 0
                 # Camp adjacency
-                if (new_i + i_diff, new_j + j_diff) in self.camps and \
+                if (new_i + i_diff, new_j + j_diff) in self.camps_adjacency and \
                         (new_i, new_j) not in self.camps and \
                         board[new_i + i_diff, new_j + j_diff] > 1:
                     board[new_i + i_diff, new_j + j_diff] = 0
