@@ -102,7 +102,7 @@ class TablutGame(Game):
         (old_i, old_j), (new_i, new_j) = move
         new_board[new_i, new_j] = new_board[old_i, old_j]
         new_board[old_i, old_j] = 0
-        new_board = self.eliminate_from_board(new_board, state.to_move)
+        new_board = self.eliminate_from_board(new_board, state.to_move, move)
 
         # Get new moves list
         new_moves = list()
@@ -190,82 +190,74 @@ class TablutGame(Game):
 
         return moves
 
-    def eliminate_from_board(self, board, last_player):
+    def eliminate_from_board(self, board, last_player, move):
+        _, (new_i, new_j) = move
+
         # Eliminate blacks if white move is the last one
         if last_player == 'w':
-            for (i, j) in np.argwhere(board == 1):
-                # Vertical basic check
-                if 0 < i < board.shape[0] - 1:
-                    if board[i - 1, j] == board[i + 1, j] == 2:
-                        board[i, j] = 0
-                # Horizontal basic check
-                if 0 < j < board.shape[1] - 1:
-                    if board[i, j - 1] == board[i, j + 1] == 2:
-                        board[i, j] = 0
-                # Check castle adjacency
-                if (i, j) in self.castle_adjacency:
-                    rel_pos_i = i - 4
-                    rel_pos_j = j - 4
-
-                    if board[i + rel_pos_i, j + rel_pos_j] == 2:
-                        board[i, j] = 0
-                # Check camp adjacency
-                if (i, j) in self.camps_adjacency:
-                    for neighbor_offset in self.neighbors:
-                        neighbor_position = tuple(np.array((i, j)) + np.array(neighbor_offset))
-                        if neighbor_position not in self.camps:
-                            if board[neighbor_position] == 2:
-                                board[i, j] = 0
-                                break
+            for (i_diff, j_diff) in self.neighbors:
+                # Basic check
+                if 0 < new_i + 2 * i_diff < board.shape[0] - 2 and \
+                        0 < new_j + 2 * j_diff < board.shape[1] - 2 and \
+                        board[new_i + i_diff, new_j + j_diff] == 1 and \
+                        board[new_i + 2 * i_diff, new_j + 2 * j_diff] > 1:
+                    board[new_i + i_diff, new_j + j_diff] = 0
+                # Castle adjacency
+                if (new_i + i_diff, new_j + j_diff) in self.castle_adjacency and \
+                        (new_i, new_j) not in self.castles and \
+                        board[new_i + i_diff, new_j + j_diff] == 1:
+                    board[new_i + i_diff, new_j + j_diff] = 0
+                # Camp adjacency
+                if (new_i + i_diff, new_j + j_diff) in self.camps and \
+                        (new_i, new_j) not in self.camps and \
+                        board[new_i + i_diff, new_j + j_diff] == 1:
+                    board[new_i + i_diff, new_j + j_diff] = 0
 
         # Eliminate whites if black move is the last one
         if last_player == 'b':
-            for (i, j) in np.argwhere(board == 2):
-                # Vertical basic check
-                if 0 < i < board.shape[0] - 1:
-                    if board[i - 1, j] == board[i + 1, j] == 1:
-                        board[i, j] = 0
-                # Horizontal basic check
-                if 0 < j < board.shape[1] - 1:
-                    if board[i, j - 1] == board[i, j + 1] == 1:
-                        board[i, j] = 0
-
-                # Check castle adjacency
-                if (i, j) in self.castle_adjacency:
-                    rel_pos_i = i - 4
-                    rel_pos_j = j - 4
-
-                    if board[i + rel_pos_i, j + rel_pos_j] == 1:
-                        board[i, j] = 0
-
-                # Check camp adjacency
-                if (i, j) in self.camps_adjacency:
-                    for neighbor_offset in self.neighbors:
-                        neighbor_position = tuple(np.array((i, j)) + np.array(neighbor_offset))
-                        if neighbor_position not in self.camps:
-                            if board[neighbor_position] == 1:
-                                board[i, j] = 0
-                                break
+            for (i_diff, j_diff) in self.neighbors:
+                # Basic check
+                if 0 < new_i + 2 * i_diff < board.shape[0] - 2 and \
+                        0 < new_j + 2 * j_diff < board.shape[1] - 2 and \
+                        board[new_i + i_diff, new_j + j_diff] > 1 and \
+                        board[new_i + 2 * i_diff, new_j + 2 * j_diff] == 1:
+                    board[new_i + i_diff, new_j + j_diff] = 0
+                # Castle adjacency
+                if (new_i + i_diff, new_j + j_diff) in self.castle_adjacency and \
+                        (new_i, new_j) not in self.castles and \
+                        board[new_i + i_diff, new_j + j_diff] > 1:
+                    board[new_i + i_diff, new_j + j_diff] = 0
+                # Camp adjacency
+                if (new_i + i_diff, new_j + j_diff) in self.camps and \
+                        (new_i, new_j) not in self.camps and \
+                        board[new_i + i_diff, new_j + j_diff] > 1:
+                    board[new_i + i_diff, new_j + j_diff] = 0
 
             # King capture scenarios
             king_position = tuple(np.argwhere(board == 3)[0])
+            (king_i, king_j) = king_position
+            flag = False
+            for (i_os, j_os) in self.neighbors:
+                if (king_i + i_os, king_j + j_os) == (new_i, new_j):
+                    flag = True
+                    break
+
             # King in castle
-            if king_position in self.castles:
+            if flag and king_position in self.castles:
                 if board[3, 4] == board[4, 3] == board[4, 5] == board[5, 4] == 1:
                     board[4, 4] = 0
             # King adjacent to castle
-            elif king_position in self.castle_adjacency:
+            elif flag and king_position in self.castle_adjacency:
                 enemies_around = 0
                 for neighbor_offset in self.neighbors:
                     neighbor_position = tuple(np.array(king_position) + np.array(neighbor_offset))
                     if board[neighbor_position] == 1:
                         enemies_around += 1
-
                 if enemies_around == 3:
                     board[king_position] = 0
 
             # King adjacent to camp
-            if king_position in self.camps_adjacency:
+            if flag and king_position in self.camps_adjacency:
                 for neighbor_offset in self.neighbors:
                     neighbor_position = tuple(np.array(king_position) + np.array(neighbor_offset))
                     if neighbor_position not in self.camps:
