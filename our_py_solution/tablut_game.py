@@ -214,7 +214,7 @@ class TablutGame(Game):
                     for neighbor_offset in self.neighbors:
                         neighbor_position = tuple(np.array((i, j)) + np.array(neighbor_offset))
                         if neighbor_position not in self.camps:
-                            if board[neighbor_position] == 1:
+                            if board[neighbor_position] == 2:
                                 board[i, j] = 0
                                 break
 
