@@ -4,6 +4,7 @@ import copy
 import itertools
 import random
 from collections import namedtuple
+from time import time as clock
 
 import numpy as np
 
@@ -175,7 +176,7 @@ def alpha_beta_cutoff_search(state, game, d=4, cutoff_test=None, eval_fn=None):
 # Monte Carlo Tree Search
 
 
-def monte_carlo_tree_search(state, game, N=1000):
+def monte_carlo_tree_search(state, game, time_budget=60):
     def select(n):
         """select a leaf node in the tree"""
         if n.children:
@@ -188,6 +189,7 @@ def monte_carlo_tree_search(state, game, N=1000):
         if not n.children and not game.terminal_test(n.state):
             n.children = {MCT_Node(state=game.result(n.state, action), parent=n): action
                           for action in game.actions(n.state)}
+        #   random.choice(list(n.children.keys()))
         return select(n)
 
     def simulate(game, state):
@@ -196,22 +198,25 @@ def monte_carlo_tree_search(state, game, N=1000):
         while not game.terminal_test(state):
             action = random.choice(list(game.actions(state)))
             state = game.result(state, action)
-        v = game.utility(state, player)
-        return -v
+
+        winner = ('w' if state.to_move == 'b' else 'b')
+        v = game.utility(state, winner)
+
+        return v
 
     def backprop(n, utility):
         """passing the utility back to all parent nodes"""
         if utility > 0:
-            n.U += utility
-        # if utility == 0:
-        #     n.U += 0.5
+            n.U += 1
         n.N += 1
         if n.parent:
-            backprop(n.parent, -utility)
+            backprop(n.parent, (0 if utility == 1 else 1))
 
     root = MCT_Node(state=state)
 
-    for _ in range(N):
+    start_time = clock()
+
+    while clock() - start_time < time_budget:
         leaf = select(root)
         child = expand(leaf)
         result = simulate(game, child.state)

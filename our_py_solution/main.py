@@ -118,10 +118,13 @@ def the_main():
         # Update stored state
         current_state = update_state(received_state, current_state, the_game, role)
 
+    time = (int(timeout)/10)-1
+
     while True:
         # Compute move
         # TODO: Change N back to higher value (currently 10 for testing purposes)
-        my_move = compute_move(current_state, the_game, 10, tree)
+        
+        my_move = compute_move(current_state, the_game, time, tree)
 
         # Update stored state
         current_state = the_game.result(current_state, my_move)

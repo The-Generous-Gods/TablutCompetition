@@ -122,10 +122,11 @@ class TablutGame(Game):
 
     def compute_utility(self):
         # TODO: INSERT HEURISTIC
-        return random.randint(-100, 100)
+        return 0
 
     def utility(self, state, player):
-        return state.utility if self.player == player else -state.utility
+        return 1 if self.player == player else 0
+        # return state.utility if self.player == player else -state.utility
 
     def terminal_test(self, state):
         king_positions = np.argwhere(state.board == 3)
@@ -178,17 +179,19 @@ class TablutGame(Game):
 
         final_moves = list()
         for (old_cell, new_cell) in moves:
-            # Don't end movement on castle
-            if new_cell in self.castles:
-                continue
+            if old_cell != (4,4):
+                (old_row, old_column) = old_cell
+                (new_row, new_column) = new_cell
+                if old_row == 4 and new_row == 4:
+                    if (old_column <= 4 and new_column >= 4) or (old_column >= 4 and new_column <= 4):
+                        continue
 
-            # Don't end movement on camp
-            if (old_cell not in self.camps) and (new_cell in self.camps):
-                continue
-
+                if old_column == 4 and new_column == 4:
+                    if (old_row <= 4 and new_row >= 4) or (old_row >= 4 and new_row <= 4):
+                        continue
             final_moves.append((old_cell, new_cell))
-
-        return moves
+            
+        return final_moves
 
     def eliminate_from_board(self, board, last_player, move):
         _, (new_i, new_j) = move
